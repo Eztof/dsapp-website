@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DSA-Mastertool</title>
+  <link rel="stylesheet" href="assets/css/styles.css" />
+  <!-- Firebase SDKs … (wie oben gezeigt) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-analytics.js"></script>
+  <script type="module" src="assets/js/firebase-init.js"></script>
+  <!-- Haupt-Script -->
+  <script type="module" src="assets/js/main.js" defer></script>
+</head>
+<body>
+  <header>
+    <h1>DSA-Mastertool</h1>
+    <nav>
+      <ul>
+        <li><a href="#spielerbereich" id="link-spielerbereich">Spielerbereich</a></li>
+        <li><a href="#nsc" id="link-nsc">NSCs</a></li>
+        <li><a href="#kalender" id="link-kalender">Kalender</a></li>
+        <li><a href="#notizen" id="link-notizen">Notizen</a></li>
+        <li><a href="#wuerfel" id="link-wuerfel">Würfel</a></li>
+        <li><a href="#basar" id="link-basar">Basar</a></li>
+        <li><a href="#umrechner" id="link-umrechner">Umrechner</a></li>
+        <li><a href="#nachschlag" id="link-nachschlag">Nachschlage-werkzeug</a></li>
+        <li><a href="#admin" id="link-admin">Adminbereich</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Platzhalter für die einzelnen Sektionen -->
+    <section id="spielerbereich" class="content-section" hidden></section>
+    <section id="nsc" class="content-section" hidden></section>
+    <section id="kalender" class="content-section" hidden></section>
+    <section id="notizen" class="content-section" hidden></section>
+    <section id="wuerfel" class="content-section" hidden></section>
+    <section id="basar" class="content-section" hidden></section>
+    <section id="umrechner" class="content-section" hidden></section>
+    <section id="nachschlag" class="content-section" hidden></section>
+    <section id="admin" class="content-section" hidden></section>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Dein Name – DSA-Mastertool</p>
+  </footer>
+</body>
+</html>
