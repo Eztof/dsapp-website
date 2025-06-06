@@ -35,15 +35,16 @@ export function initNSC(sectionEl) {
   const nscColl = collection(firestore, "NSCs");
   const q = query(nscColl, orderBy("name"));
 
-  // Live-Updates aus Firestore
+  // Firestore-Live-Update
   onSnapshot(q, (snapshot) => {
     tBody.innerHTML = "";
     snapshot.forEach((docSnap) => {
       const data = docSnap.data();
       const tr = document.createElement("tr");
 
-      // Datum in lesbare Form bringen
-      const datumObj = data.datum instanceof Date ? data.datum : data.datum.toDate();
+      // Datum in deutsches Format umwandeln
+      const datumObj =
+        data.datum instanceof Date ? data.datum : data.datum.toDate();
       const datumStr = datumObj.toLocaleDateString("de-DE");
 
       tr.innerHTML = `
@@ -55,15 +56,16 @@ export function initNSC(sectionEl) {
         <td></td>
       `;
 
-      // Aktionen
       const actionTd = tr.querySelector("td:last-child");
 
+      // Bearbeiten-Button
       const bearbBtn = document.createElement("button");
       bearbBtn.textContent = "Bearbeiten";
       bearbBtn.addEventListener("click", () => {
         bearbeitenNSC(docSnap.id, data);
       });
 
+      // Löschen-Button
       const delBtn = document.createElement("button");
       delBtn.textContent = "Löschen";
       delBtn.addEventListener("click", async () => {
@@ -77,7 +79,7 @@ export function initNSC(sectionEl) {
     });
   });
 
-  // Neuer NSC anlegen
+  // Neuen NSC anlegen
   sectionEl.querySelector("#btnNeuerNSC").addEventListener("click", async () => {
     const name = prompt("Name des NSC:");
     if (!name) return;
@@ -109,7 +111,7 @@ export function initNSC(sectionEl) {
     alert("Neuer NSC angelegt.");
   });
 
-  // Funktion: NSC bearbeiten
+  // Hilfsfunktion: NSC bearbeiten
   function bearbeitenNSC(docId, data) {
     const neuerName = prompt("Neuer Name:", data.name);
     if (neuerName === null) return;
