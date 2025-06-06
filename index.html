@@ -5,13 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DSA-Mastertool</title>
   <link rel="stylesheet" href="assets/css/styles.css" />
-  <!-- Firebase SDKs … (wie oben gezeigt) -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-analytics.js"></script>
+
+  <!-- Dein Firebase-Init-Modul (hier holen wir uns alle SDKs als ES-Module) -->
   <script type="module" src="assets/js/firebase-init.js"></script>
-  <!-- Haupt-Script -->
+
+  <!-- Haupt-Skript mit Routing, das ebenfalls Module importiert -->
   <script type="module" src="assets/js/main.js" defer></script>
 </head>
 <body>
@@ -33,7 +31,6 @@
   </header>
 
   <main>
-    <!-- Platzhalter für die einzelnen Sektionen -->
     <section id="spielerbereich" class="content-section" hidden></section>
     <section id="nsc" class="content-section" hidden></section>
     <section id="kalender" class="content-section" hidden></section>
