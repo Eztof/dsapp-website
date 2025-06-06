@@ -34,31 +34,32 @@ export function initBasar(sectionEl) {
   const basarColl = collection(firestore, "Basar");
   const q = query(basarColl, orderBy("name"));
 
-  // Live-Updates aus Firestore
+  // Firestore-Live-Update
   onSnapshot(q, (snapshot) => {
     tBody.innerHTML = "";
     snapshot.forEach((docSnap) => {
       const data = docSnap.data();
       const tr = document.createElement("tr");
 
-      // Spalten: Name, Beschreibung, Preis, Gewicht
-      tr.innerHTML = `
+      const datumHTML = `
         <td>${data.name}</td>
         <td>${data.beschreibung}</td>
         <td>${data.preis}</td>
         <td>${data.gewicht}</td>
         <td></td>
       `;
+      tr.innerHTML = datumHTML;
 
-      // Aktionen (Bearbeiten, Löschen)
       const actionTd = tr.querySelector("td:last-child");
 
+      // Bearbeiten-Button
       const bearbBtn = document.createElement("button");
       bearbBtn.textContent = "Bearbeiten";
       bearbBtn.addEventListener("click", () => {
         bearbeitenArtikel(docSnap.id, data);
       });
 
+      // Löschen-Button
       const delBtn = document.createElement("button");
       delBtn.textContent = "Löschen";
       delBtn.addEventListener("click", async () => {
@@ -72,7 +73,7 @@ export function initBasar(sectionEl) {
     });
   });
 
-  // Neuer Artikel anlegen
+  // Neuen Artikel anlegen
   sectionEl.querySelector("#btnNeuerArtikel").addEventListener("click", async () => {
     const name = prompt("Name des Artikels:");
     if (!name) return;
@@ -99,7 +100,7 @@ export function initBasar(sectionEl) {
     alert("Neuer Artikel angelegt.");
   });
 
-  // Funktion: Artikel bearbeiten (alerternativ Formular)
+  // Hilfsfunktion: Artikel bearbeiten
   function bearbeitenArtikel(docId, data) {
     const neuerName = prompt("Neuer Name:", data.name);
     if (neuerName === null) return;
