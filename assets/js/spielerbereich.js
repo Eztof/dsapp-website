@@ -4,9 +4,10 @@ import { firestore } from "./firebase-init.js";
 import {
   collection,
   doc,
-  getDoc,
+  getDocs,
   onSnapshot,
-  addDoc
+  addDoc,
+  updateDoc
 } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
 // SHA-256-Hashfunktion für Passwort-Vergleich
@@ -20,12 +21,11 @@ async function sha256(text) {
 export function initSpielerbereich(sectionEl) {
   sectionEl.innerHTML = `
     <h2>Spielerbereich</h2>
-    <p>Bitte gib deinen Spielernamen und dein Passwort ein.</p>
     <div>
-      <label>Spielername: <input type="text" id="inputSpielerName" /></label>
+      <label>Spielername: <input type="text" id="inputSpielerName"/></label>
     </div>
     <div>
-      <label>Passwort: <input type="password" id="inputPasswort" /></label>
+      <label>Passwort: <input type="password" id="inputPasswort"/></label>
     </div>
     <button id="btnLoginSpieler">Login</button>
     <div id="heldenContainer"></div>
@@ -40,25 +40,24 @@ export function initSpielerbereich(sectionEl) {
     const spielerName = nameInput.value.trim();
     const passwort = pwInput.value;
     if (!spielerName || !passwort) {
-      alert("Name und Passwort eingeben.");
+      alert("Bitte Name und Passwort eingeben.");
       return;
     }
 
-    // Spieler-Dokument suchen (z. B. über Collection "Spieler" mit where("name","==",...) – hier: vereinfachte Annahme, dass id gleich Name ist)
-    // Besser: Query nach name, aber hier: wir nehmen an, Dokument-ID ist generiert, deshalb Query:
+    // Suche in Firestore nach Dokument, dessen Feld "name" genau spielerName ist
     const spielerColl = collection(firestore, "Spieler");
-    const snapshot = await firestore
+    const querySnap = await firestore
       .collection("Spieler")
       .where("name", "==", spielerName)
       .get();
 
-    if (snapshot.empty) {
+    if (querySnap.empty) {
       alert("Spieler nicht gefunden.");
       return;
     }
 
-    // Wir nehmen das erste Ergebnis
-    const docSnap = snapshot.docs[0];
+    // Wir nehmen das erste gefundene Dokument
+    const docSnap = querySnap.docs[0];
     const data = docSnap.data();
     const gespeicherterHash = data.passwortHash;
     const eingabeHash = await sha256(passwort);
@@ -68,7 +67,7 @@ export function initSpielerbereich(sectionEl) {
       return;
     }
 
-    // Login erfolgreich: Zeige Liste der Helden
+    // Login erfolgreich → Zeige Helden-Liste
     showHeldenListe(docSnap.id, heldenContainer);
   });
 }
@@ -81,14 +80,9 @@ function showHeldenListe(spielerId, container) {
   `;
 
   const liste = container.querySelector("#listeHelden");
-  const heldenColl = collection(
-    firestore,
-    "Spieler",
-    spielerId,
-    "Helden"
-  );
+  const heldenColl = collection(firestore, "Spieler", spielerId, "Helden");
 
-  // Live-Updates der Helden-Subcollection
+  // Live-Updates der Subcollection "Helden"
   onSnapshot(heldenColl, (snapshot) => {
     liste.innerHTML = "";
     snapshot.forEach((heldSnap) => {
@@ -98,17 +92,15 @@ function showHeldenListe(spielerId, container) {
       li.addEventListener("click", () => {
         showCharakterbogen(spielerId, heldSnap.id, daten, container);
       });
-
       liste.appendChild(li);
     });
   });
 
-  // Neuer Held anlegen
+  // Neuen Helden anlegen
   container.querySelector("#btnNeuerHeld").addEventListener("click", async () => {
     const heldName = prompt("Name des neuen Helden:");
     if (!heldName) return;
 
-    // Beispiel: Nur Name und ein leeres Attribut-Objekt anlegen
     await addDoc(heldenColl, {
       name: heldName,
       rasse: "",
@@ -124,8 +116,7 @@ function showHeldenListe(spielerId, container) {
         KK: 10
       },
       spezialfertigkeiten: {},
-      ausruestung: [],
-      // Weitere Felder nach Bedarf…
+      ausruestung: []
     });
   });
 }
@@ -142,7 +133,7 @@ function showCharakterbogen(spielerId, heldId, daten, container) {
 
   const detailsDiv = container.querySelector("#charbogenDetails");
 
-  // Anzeige der Daten
+  // Charakterdetails anzeigen
   detailsDiv.innerHTML = `
     <p><strong>Name:</strong> ${daten.name}</p>
     <p><strong>Rasse:</strong> ${daten.rasse || "(nicht gesetzt)"}</p>
@@ -158,7 +149,7 @@ function showCharakterbogen(spielerId, heldId, daten, container) {
     <button id="btnBearbeiteAusrüstung">Ausrüstung bearbeiten</button>
   `;
 
-  // Attribute anzeigen
+  // Attribute auflisten
   const attrUl = detailsDiv.querySelector("#listeAttribute");
   Object.entries(daten.attribute).forEach(([key, wert]) => {
     const li = document.createElement("li");
@@ -168,10 +159,7 @@ function showCharakterbogen(spielerId, heldId, daten, container) {
 
   // Spezialfertigkeiten anzeigen
   const sfDiv = detailsDiv.querySelector("#sfContainer");
-  if (
-    daten.spezialfertigkeiten &&
-    Object.keys(daten.spezialfertigkeiten).length > 0
-  ) {
+  if (daten.spezialfertigkeiten && Object.keys(daten.spezialfertigkeiten).length > 0) {
     const ul = document.createElement("ul");
     Object.entries(daten.spezialfertigkeiten).forEach(([sf, level]) => {
       const li = document.createElement("li");
@@ -197,16 +185,13 @@ function showCharakterbogen(spielerId, heldId, daten, container) {
     ausrUl.appendChild(li);
   }
 
-  // Bearbeiten-Buttons
+  // Buttons zum Bearbeiten
   detailsDiv
     .querySelector("#btnBearbeiteAttribute")
     .addEventListener("click", async () => {
       const neuesAttribute = {};
       for (const key of Object.keys(daten.attribute)) {
-        const neuerWertStr = prompt(
-          `Wert für ${key}:`,
-          daten.attribute[key]
-        );
+        const neuerWertStr = prompt(`Wert für ${key}:`, daten.attribute[key]);
         const neuerWert = parseInt(neuerWertStr);
         if (!isNaN(neuerWert)) {
           neuesAttribute[key] = neuerWert;
@@ -217,7 +202,7 @@ function showCharakterbogen(spielerId, heldId, daten, container) {
       await firestore
         .doc(`Spieler/${spielerId}/Helden/${heldId}`)
         .update({ attribute: neuesAttribute });
-      alert("Attribute aktualisiert. Bitte lade den Helden neu.");
+      alert("Attribute aktualisiert. Bitte Seite neu laden.");
     });
 
   detailsDiv.querySelector("#btnBearbeiteSF").addEventListener("click", async () => {
@@ -241,7 +226,7 @@ function showCharakterbogen(spielerId, heldId, daten, container) {
     await firestore
       .doc(`Spieler/${spielerId}/Helden/${heldId}`)
       .update({ spezialfertigkeiten: neueSF });
-    alert("Spezialfertigkeiten aktualisiert. Bitte lade den Helden neu.");
+    alert("Spezialfertigkeiten aktualisiert. Bitte Seite neu laden.");
   });
 
   detailsDiv
@@ -260,6 +245,6 @@ function showCharakterbogen(spielerId, heldId, daten, container) {
       await firestore
         .doc(`Spieler/${spielerId}/Helden/${heldId}`)
         .update({ ausruestung: neueAusrüstung });
-      alert("Ausrüstung aktualisiert. Bitte lade den Helden neu.");
+      alert("Ausrüstung aktualisiert. Bitte Seite neu laden.");
     });
 }
