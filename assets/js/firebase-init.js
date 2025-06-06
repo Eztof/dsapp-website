@@ -1,7 +1,12 @@
 // assets/js/firebase-init.js
+
+// 1) Firebase-App (Core) per ES-Modul importieren
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+// 2) Firestore modulweise importieren
 import { getFirestore } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+// 3) Realtime Database per Modul
 import { getDatabase } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+// 4) Analytics (optional)
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-analytics.js";
 
 // Deine Firebase-Konfiguration
@@ -18,11 +23,12 @@ const firebaseConfig = {
 
 // Firebase initialisieren
 const app = initializeApp(firebaseConfig);
-// Analytics initialisieren (falls du das nutzen willst)
+// Analytics initialisieren (kannst du weglassen, falls du es nicht brauchst)
 const analytics = getAnalytics(app);
-// Firestore & Realtime Database Instanzen erstellen
+
+// Firestore- und Realtime Database-Instanzen erstellen
 const firestore = getFirestore(app);
 const realtimeDB = getDatabase(app);
 
-// Exportiere die Instanzen, damit andere Module sie verwenden können
+// Exportiere die beiden Instanzen, damit andere Module (z. B. main.js, basar.js, usw.) sie importieren können:
 export { firestore, realtimeDB };
